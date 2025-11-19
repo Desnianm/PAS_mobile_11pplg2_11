@@ -7,18 +7,25 @@ import 'package:pas_mobile_11pplg2_11/routes/routes.dart';
 
 class AuthController extends GetxController {
   var isLoading = false.obs;
+
   final registerUrl = 'https://mediadwi.com/api/latihan/register-user';
   final loginUrl = 'https://mediadwi.com/api/latihan/login';
 
-  Future<void> register(String username, String fullName, String email, String password) async {
+
+  Future<void> register(
+      String username, String fullName, String email, String password) async {
     try {
       isLoading.value = true;
-      final res = await ApiService.client.post(Uri.parse(registerUrl), body: {
-        'username': username,
-        'full_name': fullName,
-        'email': email,
-        'password': password,
-      });
+
+      final res = await ApiService.client.post(
+        Uri.parse(registerUrl),
+        body: {
+          'username': username,
+          'full_name': fullName,
+          'email': email,
+          'password': password,
+        },
+      );
 
       final body = json.decode(res.body);
       isLoading.value = false;
@@ -35,46 +42,73 @@ class AuthController extends GetxController {
     }
   }
 
+
   Future<void> login(String username, String password) async {
     try {
       isLoading.value = true;
-      final res = await ApiService.client.post(Uri.parse(loginUrl), body: {
-        'username': username,
-        'password': password,
-      });
+
+      final res = await ApiService.client.post(
+        Uri.parse(loginUrl),
+        body: {
+          'username': username,
+          'password': password,
+        },
+      );
 
       final body = json.decode(res.body);
       isLoading.value = false;
 
       if (res.statusCode == 200) {
         String? token;
-        if (body['token'] != null) token = body['token'];
-        else if (body['data'] != null && body['data']['token'] != null) token = body['data']['token'];
-        else if (body is String) token = body;
+
+
+        if (body['token'] != null) {
+          token = body['token'];
+        } else if (body['data'] != null && body['data']['token'] != null) {
+          token = body['data']['token'];
+        } else if (body['data'] != null &&
+            body['data']['access_token'] != null) {
+          token = body['data']['access_token'];
+        }
 
         if (token != null && token.isNotEmpty) {
           final prefs = await SharedPreferences.getInstance();
+
+  
           await prefs.setString('token', token);
-          if (body['username'] != null) {
-            await prefs.setString('username', body['username']);
-          }
-          if (body['email'] != null) {
-            await prefs.setString('email', body['email']);
-          }
+
+
+          final userData = body['data'] ?? body;
+
+
+          await prefs.setString(
+            'username',
+            userData['username'] ?? username,
+          );
+
+
+          await prefs.setString(
+            'email',
+            userData['email'] ?? '',
+          );
+
+  
+          await prefs.setString(
+            'photoUrl',
+            userData['photo'] ??
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+          );
+
+
           Get.offAllNamed(AppRoutes.home);
-          Get.snackbar('Success', 'Login berhasil');
-        } else {
-          if (body['status'] == true && body['data'] != null) {
-            final prefs = await SharedPreferences.getInstance();
-            final tokenFromData = body['data']['token'] ?? body['data']['access_token'];
-            if (tokenFromData != null) {
-              await prefs.setString('token', tokenFromData);
-              Get.offAllNamed(AppRoutes.home);
-              return;
-            }
-          }
-          Get.snackbar('Error', body['message'] ?? 'Login gagal: token tidak ditemukan');
+          Get.snackbar("Success", "Login berhasil");
+          return;
         }
+
+        Get.snackbar(
+          'Error',
+          body['message'] ?? 'Login gagal: Token tidak ditemukan',
+        );
       } else {
         Get.snackbar('Error', 'Login failed: ${res.statusCode}');
       }
@@ -84,9 +118,11 @@ class AuthController extends GetxController {
     }
   }
 
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
+    await prefs.clear(); // bersihkan semua data user
+
     Get.offAllNamed(AppRoutes.login);
   }
 }
