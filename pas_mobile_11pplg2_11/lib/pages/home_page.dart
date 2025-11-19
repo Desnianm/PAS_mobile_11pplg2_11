@@ -14,7 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int idx = 0;
-  final pages = [const TvshowPage(), const BookmarkPage(), const ProfilePage()];
+  final pages = [const TvshowPage(), const BookmarkPage(),  ProfilePage()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(

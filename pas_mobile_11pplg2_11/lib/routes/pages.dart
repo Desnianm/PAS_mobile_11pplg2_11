@@ -14,7 +14,7 @@ class AppPages {
     GetPage(name: AppRoutes.splash, page: () => const SplashPage(), binding: AuthBinding()),
     GetPage(name: AppRoutes.login, page: () => const LoginPage(), binding: AuthBinding()),
     GetPage(name: AppRoutes.register, page: () => const RegisterPage(), binding: AuthBinding()),
-    GetPage(name: AppRoutes.profile, page: () => const ProfilePage (), binding: AuthBinding()),
+    GetPage(name: AppRoutes.profile, page: () =>  ProfilePage (), binding: AuthBinding()),
     GetPage(name: AppRoutes.home, page: () => const HomePage(), binding: AuthBinding()),
     GetPage(name: AppRoutes.tvshow, page: () => const TvshowPage(), binding: AuthBinding()),
     GetPage(name: AppRoutes.bookmark, page: () => const BookmarkPage(), binding: AuthBinding()),

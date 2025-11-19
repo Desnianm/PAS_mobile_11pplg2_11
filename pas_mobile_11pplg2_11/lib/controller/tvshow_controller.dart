@@ -1,25 +1,33 @@
-// lib/controllers/tvshow_controller.dart
+import 'dart:convert';
 import 'package:get/get.dart';
-import '../models/tv_model.dart';
-import '../network/tv_api_service.dart';
+import 'package:http/http.dart' as http;
 
+import '../models/tv_model.dart';
+ 
 class TvShowController extends GetxController {
   var shows = <Tvmodel>[].obs;
   var loading = false.obs;
-  var error = RxnString();
+  var error = Rx<String?>(null);
 
   @override
   void onInit() {
+    fetchShows(); 
     super.onInit();
-    fetchShows();
-  }
+   }
 
   Future<void> fetchShows() async {
     try {
       loading.value = true;
       error.value = null;
-      final list = await TvApiService.fetchShows();
-      shows.assignAll(list);
+
+      final url = Uri.parse("https://api.tvmaze.com/shows");
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        shows.value = tvmodelFromJson(response.body);
+      } else {
+        error.value = "Server Error";
+      }
     } catch (e) {
       error.value = e.toString();
     } finally {
@@ -27,7 +35,6 @@ class TvShowController extends GetxController {
     }
   }
 
- 
   Future<void> refresh() async {
     await fetchShows();
   }
